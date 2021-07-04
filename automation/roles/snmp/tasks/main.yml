@@ -1,0 +1,52 @@
+---
+
+- name: Add Debian Buster Non-Free Repo
+  apt_repository:
+    repo: deb http://ftp.us.debian.org/debian/ buster main contrib non-free
+    state: present
+    update_cache: yes
+
+- name: Install SNMP Mibs
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - snmp-mibs-downloader
+
+- name: Enable SNMP in a VRF on boot
+  systemd:
+    name: snmpd@mgmt
+    enabled: yes
+
+- name: Copy snmpd configuration file
+  template:
+    src: snmpd.j2
+    dest: /etc/snmp/snmpd.conf
+    backup: yes
+
+- name: Stop SNMP
+  systemd:
+    name: snmpd
+    state: stopped
+  ignore_errors: yes
+
+- name: Disable SNMP
+  systemd:
+    name: snmpd
+    enabled: no
+  ignore_errors: yes
+
+- name: Stop SNMP in a VRF
+  systemd:
+    name: snmpd@mgmt
+    state: stopped
+  ignore_errors: yes
+
+- name: Start SNMP in a VRF
+  systemd:
+    name: snmpd@mgmt
+    state: started
+    daemon_reload: yes
+
+- name: Flush Handlers, best practice
+  meta: flush_handlers

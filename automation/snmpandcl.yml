@@ -1,0 +1,10 @@
+- hosts: servers
+  become: true
+  roles:
+  - servers
+
+- hosts: switches
+  become: true
+  roles:
+  - frr
+  - snmp

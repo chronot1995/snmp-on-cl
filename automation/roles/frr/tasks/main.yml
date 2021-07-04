@@ -1,0 +1,17 @@
+---
+
+- name: Add agentx to FRR
+  lineinfile:
+    path: /etc/frr/frr.conf
+    line: agentx
+    create: yes
+
+- name: Add SNMP to BGP
+  lineinfile:
+    path: /etc/frr/daemons
+    line: bgpd_options="   -M snmp -A 127.0.0.1"
+    create: yes
+  notify: restart frr
+
+- name: Flush Handlers, best practice
+  meta: flush_handlers
